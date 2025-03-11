@@ -11,25 +11,25 @@ import java.util.StringTokenizer;
 
 public class Main {
 
-    public static class Point implements Comparable<Point> {
-        int a;
-        int b;
-        int w;
-        String num;
+	public static class Point implements Comparable<Point> {
+		int a;
+		int b;
+		int w;
+		String num;
 
-        public Point(int a, int b, int w, String num) {
-            this.a = a;
-            this.b = b;
-            this.w = w;
-            this.num = num;
-        }
+		public Point(int a, int b, int w, String num) {
+			this.a = a;
+			this.b = b;
+			this.w = w;
+			this.num = num;
+		}
 
-        @Override
-        public int compareTo(Point o) {
-            if (this.w != o.w)
-                return this.w - o.w;
-            // 사전순 비교: 경로 문자열을 공백으로 분리하여 정수 단위로 비교
-            String[] tokens1 = this.num.split(" ");
+		@Override
+		public int compareTo(Point o) {
+			if (this.w!= o.w) {
+				return this.w- o.w;
+			}
+			String[] tokens1 = this.num.split(" ");
             String[] tokens2 = o.num.split(" ");
             int len = Math.min(tokens1.length, tokens2.length);
             for (int i = 0; i < len; i++) {
@@ -39,94 +39,85 @@ public class Main {
                     return v1 - v2;
             }
             return tokens1.length - tokens2.length;
-        }
-    }
+		}
+	}
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int M = Integer.parseInt(st.nextToken());
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		int N = Integer.parseInt(st.nextToken());
+		int M = Integer.parseInt(st.nextToken());
 
-        List<Integer>[] list = new ArrayList[N + 1];
-        for (int i = 1; i <= N; i++) {
-            list[i] = new ArrayList<>();
-        }
+		List<Integer>[] list = new ArrayList[N + 1];
+		for (int i = 1; i <= N; i++) {
+			list[i] = new ArrayList<>();
+		}
 
-        for (int i = 0; i < M; i++) {
-            st = new StringTokenizer(br.readLine());
-            int u = Integer.parseInt(st.nextToken());
-            int v = Integer.parseInt(st.nextToken());
-            list[u].add(v);
-            list[v].add(u);
-        }
-        
-        // 인접 리스트를 정렬하여 오름차순 탐색
-        for (int i = 1; i <= N; i++) {
-            Collections.sort(list[i]);
-        }
-        
-        st = new StringTokenizer(br.readLine());
-        int a = Integer.parseInt(st.nextToken());
-        int b = Integer.parseInt(st.nextToken());
+		for (int i = 0; i < M; i++) {
+			st = new StringTokenizer(br.readLine());
+			int a = Integer.parseInt(st.nextToken());
+			int b = Integer.parseInt(st.nextToken());
+			list[a].add(b);
+			list[b].add(a);
+		}
+		
+		st = new StringTokenizer(br.readLine());
 
-        boolean[] visited = new boolean[N + 1];
-        visited[a] = true;
-        PriorityQueue<Point> pq = new PriorityQueue<>();
-        // 초기 경로 문자열은 시작 정점을 포함
-        pq.add(new Point(a, a, 0, a + ""));
-        int ans = 0;
-        Point pathToB = null;
+		int a = Integer.parseInt(st.nextToken());
+		int b = Integer.parseInt(st.nextToken());
 
-        while (!pq.isEmpty()) {
-            Point p = pq.poll();
-            if (p.b == b) {
-                pathToB = p;
-                break;
-            }
-            for (int next : list[p.b]) {
-                if (!visited[next]) {
-                    visited[next] = true;
-                    pq.add(new Point(p.b, next, p.w + 1, p.num + " " + next));
-                }
-            }
-        }
-        
-        if (pathToB != null) {
-            ans += pathToB.w;
-            // 첫 번째 경로의 중간 정점을 재방문하지 않도록 표시 (시작과 끝 제외)
-            visited = new boolean[N + 1];
-            String[] tokens = pathToB.num.split(" ");
-            for (int i = 1; i < tokens.length - 1; i++) {
-                visited[Integer.parseInt(tokens[i])] = true;
-            }
-        }
-        
-        // 두 번째 경로: b에서 a로 탐색 (첫 번째 경로의 중간 노드 제외)
-        pq.clear();
-        visited[b] = true;
-        pq.add(new Point(b, b, 0, b + ""));
-        Point pathToA = null;
-        while (!pq.isEmpty()) {
-            Point p = pq.poll();
-            if (p.b == a) {
-                pathToA = p;
-                break;
-            }
-            for (int next : list[p.b]) {
-                if (!visited[next]) {
-                    visited[next] = true;
-                    pq.add(new Point(p.b, next, p.w + 1, p.num + " " + next));
-                }
-            }
-        }
-        if (pathToA != null) {
-            ans += pathToA.w;
-        }
-        bw.write(ans + "");
-        br.close();
-        bw.close();
-    }
+		boolean[] visited = new boolean[N + 1];
+		visited[a] = true;
+		PriorityQueue<Point> pq = new PriorityQueue<>();
+		pq.add(new Point(a, a, 0, a+""));
+
+		int ans = 0;
+
+		while (!pq.isEmpty()) {
+			Point p = pq.poll();
+			if (p.b == b) {
+				ans += p.w;
+				visited = new boolean[N+1];
+				st = new StringTokenizer(p.num);
+				st.nextToken();
+				for (int i = 0; i < p.w - 1; i++) {
+					visited[Integer.parseInt(st.nextToken())] = true;
+				}
+				break;
+			}
+			for (int num : list[p.b]) {
+				if (!visited[num]) {
+					visited[num] = true;
+					pq.add(new Point(p.b, num, p.w + 1 , p.num+" " +num));
+				}
+			}
+		}
+
+		pq.clear();
+		
+		visited[a] = false;
+		pq.add(new Point(b, b, 0, b+ ""));
+		visited[b] = true;
+
+		while (!pq.isEmpty()) {
+			Point p = pq.poll();
+			if (p.b == a) {
+				ans += p.w;
+				break;
+			}
+			for (int num : list[p.b]) {
+				if (!visited[num]) {
+					visited[num] = true;
+					pq.add(new Point(p.b, num, p.w + 1, p.num + " " + num));
+				}
+			}
+		}
+
+		bw.write(ans + "");
+
+		br.close();
+		bw.close();
+	}
 }
